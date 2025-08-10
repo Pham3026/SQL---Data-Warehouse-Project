@@ -1,6 +1,11 @@
 
 /*=============================================================
-Create Database and Schemas
+1. Create Database and Schemas
+2. DDL Script: Create Bronze Tables
+3. Stored Procedure: Load Bronze Layer (Source -> Bronze)
+=============================================================*/
+/*=============================================================
+1. Create Database and Schemas
 =============================================================*/
 
 USE masterr;  
@@ -28,7 +33,7 @@ CREATE SCHEMA gold;
 GO
   
 /*===============================================================================
-DDL Script: Create Bronze Tables
+2. DDL Script: Create Bronze Tables
 ===============================================================================*/
 IF OBJECT_ID('bronze.crm_cust_info', 'U') IS NOT NULL
 BEGIN
@@ -45,7 +50,7 @@ CREATE TABLE bronze.crm_cust_info (
 	cst_create_date     DATE
 	);
 GO
-
+	
 IF OBJECT_ID('bronze.crm_sales_details', 'U') IS NOT NULL
 BEGIN
 	DROP TABLE bronze.crm_sales_details;  
@@ -63,7 +68,7 @@ CREATE TABLE bronze.crm_sales_details (
 
 );
 GO
-
+	
 IF OBJECT_ID('bronze.crm_prd_info', 'U') IS NOT NULL
 BEGIN
 	DROP TABLE  bronze.crm_prd_info;  
@@ -79,8 +84,7 @@ CREATE TABLE bronze.crm_prd_info (
 	prd_end_dt   DATETIME
 );
 GO
-
-
+	
 IF OBJECT_ID('bronze.erp_cust', 'U') IS NOT NULL
 BEGIN
 	DROP TABLE  bronze.erp_cust;  
@@ -92,7 +96,6 @@ CREATE TABLE bronze.erp_cust (
 	GEN   NVARCHAR(50)
 );
 GO
-
 
 IF OBJECT_ID('bronze.erp_px_cat', 'U') IS NOT NULL
 BEGIN
@@ -108,7 +111,6 @@ CREATE TABLE bronze.erp_px_cat (
 );
 GO
 
-
 IF OBJECT_ID('bronze.erp_loc ', 'U') IS NOT NULL
 BEGIN
 	DROP TABLE  bronze.erp_loc;
@@ -119,4 +121,7 @@ CREATE TABLE bronze.erp_loc (
 	cntry NVARCHAR(50)	
 );
 
+/*===============================================================================
+3. Stored Procedure: Load Bronze Layer (Source -> Bronze)
+===============================================================================*/
 
