@@ -212,3 +212,5 @@ WITH(
 	TABLOCK
 );
 END
+	
+EXEC bronze.load_bronze
