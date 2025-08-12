@@ -143,6 +143,8 @@ CREATE TABLE bronze.erp_loc (
 /*===============================================================================
 3. Stored Procedure: Load Bronze Layer (Source -> Bronze)
 ===============================================================================*/
+CREATE OR ALTER PROCEDURE bronze.load_bronze AS
+BEGIN
 TRUNCATE TABLE bronze.crm_cust_info  
 BULK INSERT bronze.crm_cust_info 
 FROM 'D:\Documents\work\BA\Project\Data with Baraa\sql-data-warehouse-project\datasets\source_crm\cust_info.csv'
@@ -209,4 +211,4 @@ WITH(
 	FIELDTERMINATOR = ',',
 	TABLOCK
 );
-
+END
