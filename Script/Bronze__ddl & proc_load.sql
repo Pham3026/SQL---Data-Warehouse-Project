@@ -51,6 +51,25 @@ CREATE TABLE bronze.crm_cust_info (
 	);
 GO
 	
+--Create temporary table for sales_details table
+IF OBJECT_ID('bronze.crm_sales_details_staging', 'U') IS NOT NULL
+BEGIN
+	DROP TABLE bronze.crm_sales_details_staging;  
+END
+GO
+CREATE TABLE bronze.crm_sales_details_staging (
+	sls_ord_num   NVARCHAR(50),
+	sls_prd_key   NVARCHAR(50),
+	sls_cust_id   NVARCHAR(50), 
+	sls_order_dt  NVARCHAR(50),
+	sls_ship_dt   NVARCHAR(50),
+	sls_sales     NVARCHAR(50),
+	sls_quantity  NVARCHAR(50),
+	sls_price     NVARCHAR(500)
+
+);
+GO	
+--Create sales_detail table
 IF OBJECT_ID('bronze.crm_sales_details', 'U') IS NOT NULL
 BEGIN
 	DROP TABLE bronze.crm_sales_details;  
@@ -105,7 +124,7 @@ GO
 CREATE TABLE bronze.erp_px_cat (
 	id          NVARCHAR(50),
 	cat         NVARCHAR(50),
-	subcat      INT,
+	subcat      NVARCHAR(50),
 	maintenance NVARCHAR(50)
 	
 );
@@ -124,4 +143,70 @@ CREATE TABLE bronze.erp_loc (
 /*===============================================================================
 3. Stored Procedure: Load Bronze Layer (Source -> Bronze)
 ===============================================================================*/
+TRUNCATE TABLE bronze.crm_cust_info  
+BULK INSERT bronze.crm_cust_info 
+FROM 'D:\Documents\work\BA\Project\Data with Baraa\sql-data-warehouse-project\datasets\source_crm\cust_info.csv'
+WITH(
+	FIRSTROW = 2,
+	FIELDTERMINATOR = ',',
+	TABLOCK
+);
+--Bulk insert into temporary sales_deatils table
+TRUNCATE TABLE bronze.crm_sales_details_staging
+BULK INSERT bronze.crm_sales_details_staging
+FROM 'D:\Documents\work\BA\Project\Data with Baraa\sql-data-warehouse-project\datasets\source_crm\sales_details1.csv'
+WITH(
+	FIRSTROW = 2,
+	FIELDTERMINATOR = ',',
+	TABLOCK
+);
+--Transform data from staging table to main table: sales_details
+INSERT INTO bronze.crm_sales_details
+(sls_ord_num, sls_prd_key, sls_cust_id, sls_order_dt, sls_ship_dt, sls_sales, sls_quantity, sls_price)
+SELECT
+    sls_ord_num,
+    sls_prd_key,
+    TRY_CAST(sls_cust_id AS INT),
+    TRY_CAST(sls_order_dt AS INT),
+    TRY_CAST(sls_ship_dt AS INT),
+    TRY_CAST(sls_sales AS INT),
+    TRY_CAST(sls_quantity AS INT),
+    TRY_CAST(REPLACE(sls_price, ',', '') AS INT)  -- delete delimiter, conver into INT
+FROM bronze.crm_sales_details_staging;
+
+TRUNCATE TABLE bronze.crm_prd_info 
+BULK INSERT bronze.crm_prd_info 
+FROM 'D:\Documents\work\BA\Project\Data with Baraa\sql-data-warehouse-project\datasets\source_crm\prd_info.csv'
+WITH(
+	FIRSTROW = 2,
+	FIELDTERMINATOR = ',',
+	TABLOCK
+);
+
+TRUNCATE TABLE bronze.erp_cust
+BULK INSERT bronze.erp_cust
+FROM 'D:\Documents\work\BA\Project\Data with Baraa\sql-data-warehouse-project\datasets\source_erp\CUST_AZ12.csv'
+WITH(
+	FIRSTROW = 2,
+	FIELDTERMINATOR = ',',
+	TABLOCK
+);
+
+TRUNCATE TABLE bronze.erp_loc
+BULK INSERT bronze.erp_loc
+FROM 'D:\Documents\work\BA\Project\Data with Baraa\sql-data-warehouse-project\datasets\source_erp\LOC_A101.csv'
+WITH(
+	FIRSTROW = 2,
+	FIELDTERMINATOR = ',',
+	TABLOCK
+);
+
+TRUNCATE TABLE bronze.erp_px_cat
+BULK INSERT bronze.erp_px_cat
+FROM 'D:\Documents\work\BA\Project\Data with Baraa\sql-data-warehouse-project\datasets\source_erp\PX_CAT_G1V2.csv'
+WITH(
+	FIRSTROW = 2,
+	FIELDTERMINATOR = ',',
+	TABLOCK
+);
 
